@@ -192,7 +192,122 @@ db.books.find({}).sort({ rating: -1 }).pretty();
 
 //first 2 highest rated books - limit
 
-db.books.find({}).sort({ rating: -1 }).limit(2).pretty()
+db.books.find({}).sort({ rating: -1 }).limit(2).pretty();
 
 //skip
-db.books.find({}).sort({ rating: -1 }).skip(2).pretty()
+db.books.find({}).sort({ rating: -1 }).skip(2).pretty();
+
+//include + exclude
+
+db.books.find({}, { _id: 0, rating: 1, name: 1 }).pretty();
+
+db.books.find({}, { _id: 0, rating: 0, name: 1 }).pretty();
+
+//projection + sort
+
+//include - name, rating , exclude -_id , sort - rating - desc
+
+db.books.find({}, { _id: 0, rating: 1, name: 1 }).sort({ rating: -1 }).pretty();
+
+//include - name, rating , exclude -_id , sort - name - asc
+
+db.books.find({}, { _id: 0, rating: 1, name: 1 }).sort({ name: 1 }).pretty();
+
+db.books
+  .find({}, { _id: 0, rating: 1, name: 1 })
+  .sort({ rating: -1, name: 1 })
+  .pretty();
+
+//include - name, summary , sort - name - asc, limit - 5, skip -2
+
+db.books.find({}, { name: 1, summary: 1 }).sort({ name: 1 }).pretty();
+
+db.books
+  .find({}, { name: 1, summary: 1 })
+  .sort({ name: 1 })
+  .limit(5)
+  .skip(2)
+  .pretty();
+
+//rating <= 8 , include name, rating and sort by desc
+
+db.books
+  .find({ rating: { $lte: 8 } }, { name: 1, rating: 1 })
+  .sort({ rating: -1 })
+  .pretty();
+
+db.books.find({ rating: { $gte: 9 } }).pretty();
+
+db.books.findOne({ _id: ObjectId("6442412f081ef5954efaf92c") });
+
+//aggregation
+
+//Select sum(quantity) from orders where status = "urgent"
+// group by productName
+
+db.orders.insertMany([
+  { _id: 0, productName: "Steel Beam", status: "new", quantity: 10 },
+  { _id: 1, productName: "Steel Beam", status: "urgent", quantity: 20 },
+  { _id: 2, productName: "Steel Beam", status: "urgent", quantity: 30 },
+  { _id: 3, productName: "Iron Rod", status: "new", quantity: 15 },
+  { _id: 4, productName: "Iron Rod", status: "urgent", quantity: 50 },
+  { _id: 5, productName: "Iron Rod", status: "urgent", quantity: 10 },
+]);
+
+db.orders.find().pretty();
+
+//stage1
+
+db.orders.aggregate([{ $match: { status: "urgent" } }]);
+
+//Stage2
+//$match $group $sum - aggregate operators
+
+db.orders.aggregate([
+  { $match: { status: "urgent" } },
+  {
+    $group: { _id: "$productName", totalUrgentQuantity: { $sum: "$quantity" } },
+  },
+]);
+
+//Task
+
+//1. update the language for all documents - English - default
+db.books.updateMany({}, { $set: { language: "English" } });
+
+db.books.find().pretty();
+
+//2.  update rating as 10 for "The Secret"
+
+db.books.updateOne({ name: "The Secret" }, { $set: { rating: 10 } });
+
+//3. update language as French & rating to 9 for "The 5 AM Club"
+
+db.books.updateOne(
+  { name: "The 5 AM Club" },
+  { $set: { rating: 9, language: "French" } }
+);
+
+db.books.findOne({ name: "The 5 AM Club" });
+
+// 4. update rating from 7 to 6 for "Elon musk"
+
+db.books.updateOne({ name: "Elon musk" }, { $set: { rating: 6 } });
+
+db.books.findOne({ name: "Elon musk" });
+
+//5. delete all books with rating < 8
+
+db.books.find({ rating: { $lt: 8 } }).pretty();
+
+db.books.deleteOne({ rating: { $lt: 8 } });
+
+
+db.books.deleteMany({ rating: { $lt: 8 } });
+
+
+//6.set language as tamil for Harry potter
+
+db.books.updateOne({ name: "Harry potter" }, { $set: { language: "Tamil" } });
+
+db.books.findOne({ name: "Harry potter" });
