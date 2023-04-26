@@ -56,8 +56,29 @@ const quote3 = "Good Day everyone";
 //   console.log("Successfully removed");
 // });
 
-fs.readdir("./backup", (err, files) => {
-  console.log("All file names", files);
-});
+// fs.readdir("./backup", (err, files) => {
+//   console.log("All file names", files);
+// });
 
 //Task  - Delete all files in backup folder
+
+// fs.readdir("./backup", (err, data) => {
+//   // console.log(data);
+//   data.forEach((fileName) => {
+//     fs.unlink(`./backup/${fileName}`, (err) => {
+//       console.log("Successfully deleted!!!  ", fileName);
+//     });
+//   });
+// });
+
+//writeFile => CallStack => WebApi(whoever finishes writing first) => CallBack Q -> CallStack
+
+// writeFile, readFile, appendFile - async
+// writeFileSync, readFileSync, appendFileSync - sync
+
+const [, , noOfFiles] = process.argv;
+console.log(noOfFiles);
+for (let i = 1; i <= noOfFiles; i++) {
+  fs.writeFileSync(`./backup/note-${i}.html`, quote3);
+  console.log(`Completed writing note-${i}.html`, i);
+}
