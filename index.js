@@ -10,7 +10,7 @@ const products = [
     name: "Rustic Metal Gloves",
     description:
       "The Nagasaki Lander is the trademarked name of several series of Nagasaki sport bikes, that started with the 1984 ABC800J",
-    price: "471.00",
+    price: 471,
     unitsAvailable: 7,
     productImage: "https://loremflickr.com/640/480/food",
     id: "20",
@@ -21,7 +21,7 @@ const products = [
     name: "Oriental Plastic Pizza",
     description:
       "Boston's most advanced compression wear technology increases muscle oxygenation, stabilizes active muscles",
-    price: "298.00",
+    price: 298,
     unitsAvailable: 19,
     productImage: "https://loremflickr.com/640/480/food",
     id: "21",
@@ -33,7 +33,7 @@ const products = [
     name: "Rustic Soft Computer",
     description:
       "The Apollotech B340 is an affordable wireless mouse with reliable connectivity, 12 months battery life and modern design",
-    price: "146.00",
+    price: 146,
     unitsAvailable: 99,
     productImage: "https://loremflickr.com/640/480/food",
     id: "24",
@@ -44,7 +44,7 @@ const products = [
     name: "Recycled Soft Chips",
     description:
       "The slim & simple Maple Gaming Keyboard from Dev Byte comes with a sleek body and 7- Color RGB LED Back-lighting for smart functionality",
-    price: "6.00",
+    price: 6,
     unitsAvailable: 6,
     productImage: "https://loremflickr.com/640/480/food",
     id: "25",
@@ -55,7 +55,7 @@ const products = [
     name: "Practical Granite Tuna",
     description:
       "The slim & simple Maple Gaming Keyboard from Dev Byte comes with a sleek body and 7- Color RGB LED Back-lighting for smart functionality",
-    price: "109.00",
+    price: 109,
     unitsAvailable: 20,
     productImage: "https://loremflickr.com/640/480/food",
     id: "26",
@@ -66,7 +66,7 @@ const products = [
     name: "Refined Granite Tuna",
     description:
       "Carbonite web goalkeeper gloves are ergonomically designed to give easy fit",
-    price: "702.00",
+    price: 702,
     unitsAvailable: 98,
     productImage: "https://loremflickr.com/640/480/food",
     id: "27",
@@ -77,7 +77,7 @@ const products = [
     name: "Small Wooden Sausages",
     description:
       "The Apollotech B340 is an affordable wireless mouse with reliable connectivity, 12 months battery life and modern design",
-    price: "199.00",
+    price: 199,
     unitsAvailable: 43,
     productImage: "https://loremflickr.com/640/480/food",
     id: "28",
@@ -92,16 +92,42 @@ app.get("/", (req, res) => {
 
 //get all products
 //Task
-// /products - get all products
-// /products?category=Tools - get only Tools product
-// /products?category=Tools&price=500 - filter by category and price
-// /products?price=500  - only products based on price
+// /products - get all products ✅
+// /products?category=Tools - get only Tools product ✅
+// /products?category=Tools&price=500 - filter by category and price ✅
+// /products?price=500  - only products based on price ✅
 
 app.get("/products", (req, res) => {
-  const { category } = req.query;
-  console.log(req.query);
-  const result = products.filter((pd) => pd.category == category);
-  res.send(result);
+  let { category, lcost, hcost } = req.query;
+  // let lcost = 1;
+  // let hcost = 1000;
+  console.log(req.query, category);
+  let filteredProducts = products;
+  if (category) {
+    filteredProducts = products.filter((pd) => pd.category == category);
+  }
+  if (lcost && hcost) {
+    filteredProducts = products.filter(
+      (pd) => pd.price >= lcost && pd.price <= hcost
+    );
+  }
+  // if (price) {
+  //   filteredProducts = products.filter((pd) => {
+  //     // (pd) => pd.price == price
+  //     // price <= pd.price && price >= pd.price;
+  //     if (pd.price == price) {
+  //       return pd;
+  //     } else if (pd.price <= 100) {
+  //       filteredProducts = filteredProducts.filter((pd) => pd.price <= price);
+
+  //       return filteredProducts;
+  //     } else {
+  //       filteredProducts = filteredProducts.filter((pd) => pd.price >= price);
+  //       return filteredProducts;
+  //     }
+  //   });
+  // }
+  res.send(filteredProducts);
 });
 
 //get product by Id

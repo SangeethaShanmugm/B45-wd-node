@@ -1,0 +1,14 @@
+get products, category, price
+
+app.get("/products", (req, res) => {
+  const { category, price } = req.query;
+  console.log(req.query, category, price);
+  let filteredProducts = products;
+  if (category) {
+    filteredProducts = products.filter((pd) => pd.category == category);
+  }
+  if (price) {
+    filteredProducts = products.filter((pd) => pd.price == price);
+  }
+  res.send(filteredProducts);
+});
