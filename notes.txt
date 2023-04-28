@@ -1,3 +1,8 @@
+
+
+// req => what you send/request to Server
+// res => what you receive from Server
+
 get products, category, price
 
 app.get("/products", (req, res) => {
@@ -12,3 +17,24 @@ app.get("/products", (req, res) => {
   }
   res.send(filteredProducts);
 });
+
+
+=============================================
+
+
+// if (price) {
+  //   filteredProducts = products.filter((pd) => {
+  //     // (pd) => pd.price == price
+  //     // price <= pd.price && price >= pd.price;
+  //     if (pd.price == price) {
+  //       return pd;
+  //     } else if (pd.price <= 100) {
+  //       filteredProducts = filteredProducts.filter((pd) => pd.price <= price);
+
+  //       return filteredProducts;
+  //     } else {
+  //       filteredProducts = filteredProducts.filter((pd) => pd.price >= price);
+  //       return filteredProducts;
+  //     }
+  //   });
+  // }

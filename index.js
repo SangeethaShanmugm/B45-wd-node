@@ -1,8 +1,10 @@
-const express = require("express");
+// const express = require("express");
+// const { MongoClient } = require("mongodb");
+import express from "express";
+import { MongoClient } from "mongodb";
 const app = express();
 const PORT = 9000;
-// req => what you send/request to Server
-// res => what you receive from Server
+app.use(express.json()); //inbuilt middleware//interceptor//converting body to json
 
 const products = [
   {
@@ -85,6 +87,18 @@ const products = [
   },
 ];
 
+const MONGO_URL = "mongodb://0.0.0.0:27017";
+
+//mongodb connection
+async function createConnection() {
+  const client = new MongoClient(MONGO_URL);
+  await client.connect();
+  console.log("MongoDb Connected");
+  return client;
+}
+
+const client = await createConnection();
+
 //REST API endpoints
 app.get("/", (req, res) => {
   res.send("Hello Everyone🥳🥳");
@@ -97,45 +111,89 @@ app.get("/", (req, res) => {
 // /products?category=Tools&price=500 - filter by category and price ✅
 // /products?price=500  - only products based on price ✅
 
-app.get("/products", (req, res) => {
-  let { category, lcost, hcost } = req.query;
-  // let lcost = 1;
-  // let hcost = 1000;
-  console.log(req.query, category);
-  let filteredProducts = products;
+app.get("/products", async (req, res) => {
+  let {} = req.query;
+  let category = req.query.category;
+  let lcost = Number(req.query.lcost);
+  let hcost = Number(req.query.hcost);
+  let sort = { price: 1 };
+  // let filteredProducts = products;
+  // if (category) {
+  //   filteredProducts = products.filter((pd) => pd.category == category);
+  // }
+  // if (lcost && hcost) {
+  //   filteredProducts = products.filter(
+  //     (pd) => pd.price >= lcost && pd.price <= hcost
+  //   );
+  // }
+  if (req.query.sort) {
+    sort = { price: req.query.sort };
+  }
   if (category) {
-    filteredProducts = products.filter((pd) => pd.category == category);
+    req.query = { category: category };
   }
   if (lcost && hcost) {
-    filteredProducts = products.filter(
-      (pd) => pd.price >= lcost && pd.price <= hcost
-    );
+    req.query = { $and: [{ price: { $gt: lcost, $lt: hcost } }] };
   }
-  // if (price) {
-  //   filteredProducts = products.filter((pd) => {
-  //     // (pd) => pd.price == price
-  //     // price <= pd.price && price >= pd.price;
-  //     if (pd.price == price) {
-  //       return pd;
-  //     } else if (pd.price <= 100) {
-  //       filteredProducts = filteredProducts.filter((pd) => pd.price <= price);
+  if (category && lcost && hcost) {
+    req.query = {
+      category: category,
+      $and: [{ price: { $gt: lcost, $lt: hcost } }],
+    };
+  }
 
-  //       return filteredProducts;
-  //     } else {
-  //       filteredProducts = filteredProducts.filter((pd) => pd.price >= price);
-  //       return filteredProducts;
-  //     }
-  //   });
+  //else if (category && lcost && hcost) {
+  //   req.query = {
+  //     $and: [{ category: category }, { price: { $gt: lcost, $lt: hcost } }],
+  //   };
   // }
-  res.send(filteredProducts);
+  const products = await client
+    .db("b45-wd")
+    .collection("products")
+    .find(req.query)
+    .sort(sort)
+    .toArray();
+  res.send(products);
 });
 
 //get product by Id
-app.get("/products/:id", (req, res) => {
+app.get("/products/:id", async (req, res) => {
   const { id } = req.params;
   console.log(id);
-  const product = products.find((pd) => pd.id == id);
+  //db.products.findOne({id:"20"})
+  // const product = products.find((pd) => pd.id == id);
+  const product = await client
+    .db("b45-wd")
+    .collection("products")
+    .findOne({ id: id });
+  product
+    ? res.send(product)
+    : res.status(404).send({ message: "Product Not Found" });
+});
+
+//delete product by Id
+app.delete("/products/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+  //db.products.findOne({id:"20"})
+  // const product = products.find((pd) => pd.id == id);
+  const product = await client
+    .db("b45-wd")
+    .collection("products")
+    .deleteOne({ id: id });
   res.send(product);
+});
+
+//add products
+//inbuilt middleware
+//say data is in json
+app.post("/products", async (req, res) => {
+  const newProduct = req.body;
+  const result = await client
+    .db("b45-wd")
+    .collection("products")
+    .insertMany(newProduct);
+  res.send(result);
 });
 
 app.listen(PORT, () => console.log("Server started on port ", PORT));
