@@ -4,8 +4,12 @@ import express from "express";
 import { MongoClient } from "mongodb";
 import * as dotenv from "dotenv";
 import { productsRouter } from "./routes/products.js";
+import { usersRouter } from "./routes/users.js";
+import cors from "cors";
+import bcrypt from "bcrypt";
 dotenv.config();
 const app = express();
+app.use(cors());
 const PORT = process.env.PORT;
 app.use(express.json()); //inbuilt middleware//interceptor//converting body to json
 
@@ -109,5 +113,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/products", productsRouter);
+
+app.use("/users", usersRouter);
 
 app.listen(PORT, () => console.log("Server started on port ", PORT));
